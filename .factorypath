@@ -1,0 +1,4 @@
+<factorypath>
+    <factorypathentry kind="PLUGIN" id="org.eclipse.jst.ws.annotations.core" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="WKSPJAR" id="/As_Seen_On_Reddit/war/WEB-INF/lib/gwtp-all-0.6.jar" enabled="true" runInBatchMode="false"/>
+</factorypath>

@@ -11,7 +11,7 @@ import russell.john.client.event.FacebookResultReceivedEvent;
 import russell.john.client.place.NameTokens;
 import russell.john.shared.action.FacebookAction;
 import russell.john.shared.action.FacebookResult;
-import russell.john.shared.utils.FacebookUtil;
+import russell.john.shared.utils.LinkUtils;
 
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
@@ -84,7 +84,7 @@ public class MainPresenter extends Presenter<MainPresenter.MyView, MainPresenter
 
 		else
 		{
-			Window.open(FacebookUtil.getAuthorizeUrl(), "_self", "");
+			Window.open(LinkUtils.getAuthorizeUrl(), "_self", "");
 		}
 	}
 

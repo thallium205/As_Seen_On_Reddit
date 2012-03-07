@@ -5,7 +5,7 @@ package russell.john.shared.utils;
  * @author John
  *
  */
-public class FacebookUtil
+public class LinkUtils
 {
 	private static final String SECRET = "3e2aa555609361ef1dd055675fdd69a0"; 
 	private static final String APPLICATION_ID = "307919755941311"; 
@@ -15,6 +15,9 @@ public class FacebookUtil
 	
 	private static final String FB_ME_URL = FB_GRAPH_URL + "me?";
 	private static final String FB_FRIENDS_URL = FB_GRAPH_URL + "me/friends?";
+	private static final String FB_FEED = FB_GRAPH_URL + "me/home?";
+	
+	private static final String REDDIT_URL = "http://www.reddit.com/api/info.json?url=";
 
 	// localhost is for testing
 	// private static final String REDIRECT_URL = "http://127.0.0.1:8888/As_Seen_On_Reddit.html?gwt.codesvr=127.0.0.1:9997/";
@@ -84,5 +87,35 @@ public class FacebookUtil
 	public static String getFriendsListUrl(final String authToken)
 	{
 		return FB_FRIENDS_URL + authToken;
+	}
+	
+	/**
+	 * Gets a URL that will return the user's feed
+	 * @param authToken
+	 * @return
+	 */
+	public static String getFeedListUrl(final String authToken)
+	{
+		return FB_FEED + authToken;
+	}
+	
+	/**
+	 * Gets a URL that will return a search query of reddit
+	 * @param link
+	 * @return
+	 */
+	public static String getRedditSearchUrl(final String link)
+	{
+		return REDDIT_URL + link;
+	}
+	
+	/**
+	 * Gets a URL that requires an HTTP Post parameter with it to post a comment to a facebook item.
+	 * @param postId - The ID of the post
+	 * @return
+	 */
+	public static String getPostCommentUrl(String authToken, String postId)
+	{
+		return FB_GRAPH_URL + postId + "/comments?" + authToken;
 	}
 }

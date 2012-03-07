@@ -1,6 +1,7 @@
 package russell.john.server.handler;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -44,7 +45,7 @@ public class GetSettingsHandler implements ActionHandler<GetSettingsAction, GetS
 		// Create a new user if one does not exist
 		if (settings == null)
 		{
-			settings = new UserSettings(action.getFbId(), "As seen on Reddit -> ", 0L, new ArrayList<String>(), action.getAuthToken());
+			settings = new UserSettings(action.getFbId(), "As seen on Reddit -> ", new Date(0L), new ArrayList<String>(), action.getAuthToken());
 			dao.put(settings);
 		}
 

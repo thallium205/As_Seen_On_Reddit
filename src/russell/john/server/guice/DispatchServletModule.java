@@ -20,7 +20,6 @@ public class DispatchServletModule extends ServletModule
 	@Override
 	public void configureServlets()
 	{
-		// serve("/troll-reddit-facebook").with(TrollReditFacebookServlet.class);
 		serve("/" + ActionImpl.DEFAULT_SERVICE_NAME).with(DispatchServiceImpl.class);
 	}
 }

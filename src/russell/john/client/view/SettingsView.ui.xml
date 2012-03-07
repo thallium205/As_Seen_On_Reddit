@@ -18,7 +18,7 @@
 			<g:ScrollPanel>
 				<p1:CellTable ui:field="cellTable" width="100%" height="100%"/>
 			</g:ScrollPanel>
-			<g:Button ui:field="btnApply">Apply Changes and Begin Trolling</g:Button>
+			<g:Button ui:field="btnApply">Show Them How Unoriginal They Are</g:Button>
 			<g:Label text="New Label" ui:field="lblApplyConfirm"/>
 		</g:VerticalPanel>
 	</g:HTMLPanel>

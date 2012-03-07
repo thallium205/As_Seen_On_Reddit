@@ -13,7 +13,7 @@ import russell.john.server.utils.Util;
 import russell.john.shared.action.FacebookAction;
 import russell.john.shared.action.FacebookFriendType;
 import russell.john.shared.action.FacebookResult;
-import russell.john.shared.utils.FacebookUtil;
+import russell.john.shared.utils.LinkUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -47,18 +47,18 @@ public class FacebookHandler implements ActionHandler<FacebookAction, FacebookRe
 		String fbName;
 		ArrayList<FacebookFriendType> fbFriends = new ArrayList<FacebookFriendType>();
 		// We need to get an auth token from facebook
-		final String url = FacebookUtil.getAccessTokenUrl(action.getAuthCode());
+		final String url = LinkUtils.getAccessTokenUrl(action.getAuthCode());
 		final String authToken = Util.fetchUrl(url);				
 		
 		try
 		{
 			// Get the users info
-			JSONObject me = new JSONObject(Util.fetchUrl(FacebookUtil.getMeUrl(authToken)));
+			JSONObject me = new JSONObject(Util.fetchUrl(LinkUtils.getMeUrl(authToken)));
 			fbId = me.getString("id");
 			fbName = me.getString("name");
 			
 			// Get the users friends
-			JSONArray data = new JSONObject(Util.fetchUrl(FacebookUtil.getFriendsListUrl(authToken))).getJSONArray("data");
+			JSONArray data = new JSONObject(Util.fetchUrl(LinkUtils.getFriendsListUrl(authToken))).getJSONArray("data");
 			for (int i = 0; i < data.length(); i++)			
 				fbFriends.add(new FacebookFriendType(data.getJSONObject(i).getString("id"), data.getJSONObject(i).getString("name")));
 		} 
@@ -68,6 +68,8 @@ public class FacebookHandler implements ActionHandler<FacebookAction, FacebookRe
 			e.printStackTrace();
 			throw new ActionException(url, e);
 		}
+		
+		// Store 
 		
 		return new FacebookResult(authToken, fbId, fbName, fbFriends);	
 	}

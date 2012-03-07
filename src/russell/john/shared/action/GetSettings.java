@@ -1,6 +1,7 @@
 package russell.john.shared.action;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import com.gwtplatform.dispatch.annotation.GenDispatch;
 import com.gwtplatform.dispatch.annotation.In;
@@ -25,7 +26,7 @@ public class GetSettings
 	String comment;
 	
 	@Out(2)
-	Long lastCheckedDate;
+	Date lastCheckedDate;
 	
 	@Out(3)
 	ArrayList<String> friends;

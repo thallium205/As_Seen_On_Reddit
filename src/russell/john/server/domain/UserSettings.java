@@ -1,6 +1,7 @@
 package russell.john.server.domain;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.persistence.Id;
 
@@ -16,16 +17,16 @@ public class UserSettings
 	
 	String fbId;
 	String comment;
-	Long lastCheckedDate;
+	Date lastCheckedDate;
 	ArrayList<String> friends;
-	String authToken; // A permanent auth token
+	String authToken; // An auth token
 	
 	public UserSettings()
 	{
 		// serialization		
 	}
 	
-	public UserSettings(String fbId, String comment, Long lastCheckedDate, ArrayList<String> friends, String authToken)
+	public UserSettings(String fbId, String comment, Date lastCheckedDate, ArrayList<String> friends, String authToken)
 	{
 		this.fbId = fbId;
 		this.comment = comment;
@@ -64,12 +65,12 @@ public class UserSettings
 		this.comment = comment;
 	}
 
-	public Long getLastCheckedDate()
+	public Date getLastCheckedDate()
 	{
 		return lastCheckedDate;
 	}
 
-	public void setLastCheckedDate(Long lastCheckedDate)
+	public void setLastCheckedDate(Date lastCheckedDate)
 	{
 		this.lastCheckedDate = lastCheckedDate;
 	}

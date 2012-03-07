@@ -70,6 +70,9 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 
 	private void setUiHandlers()
 	{
+		chkEveryone.setValue(true);
+		cellTable.setVisible(false);	
+		
 		chkEveryone.addClickHandler(new ClickHandler()
 		{
 

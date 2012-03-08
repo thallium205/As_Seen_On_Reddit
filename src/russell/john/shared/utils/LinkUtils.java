@@ -21,7 +21,8 @@ public class LinkUtils
 
 	// localhost is for testing
 	// private static final String REDIRECT_URL = "http://127.0.0.1:8888/As_Seen_On_Reddit.html?gwt.codesvr=127.0.0.1:9997/";
-	private static final String REDIRECT_URL = "http://127.0.0.1:8888/";
+	// private static final String REDIRECT_URL = "http://127.0.0.1:8888/";
+	private static final String REDIRECT_URL = "http://asseenonreddit.appspot.com";
 	
 	/**
 	 * The application ID needed for generating authentication.

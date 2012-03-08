@@ -5,10 +5,10 @@ import com.gwtplatform.dispatch.shared.Result;
 public class GetSettingsResult implements Result { 
 
   java.lang.String comment;
-  java.lang.Long lastCheckedDate;
+  java.util.Date lastCheckedDate;
   java.util.ArrayList<java.lang.String> friends;
 
-  public GetSettingsResult(java.lang.String comment, java.lang.Long lastCheckedDate, java.util.ArrayList<java.lang.String> friends) {
+  public GetSettingsResult(java.lang.String comment, java.util.Date lastCheckedDate, java.util.ArrayList<java.lang.String> friends) {
     this.comment = comment;
     this.lastCheckedDate = lastCheckedDate;
     this.friends = friends;
@@ -22,7 +22,7 @@ public class GetSettingsResult implements Result {
     return comment;
   }
 
-  public java.lang.Long getLastCheckedDate() {
+  public java.util.Date getLastCheckedDate() {
     return lastCheckedDate;
   }
 

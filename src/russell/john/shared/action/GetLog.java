@@ -8,22 +8,18 @@ import com.gwtplatform.dispatch.annotation.In;
 import com.gwtplatform.dispatch.annotation.Out;
 import com.gwtplatform.dispatch.shared.ActionImpl;
 
-
 /**
- * The @GenDispatch will generate Action and Result classes for the FacebookAction.
+ * The input/output class for a log
+ * @author John
+ *
  */
 @GenDto
 @GenDispatch(isSecure = false, serviceName = ActionImpl.DEFAULT_SERVICE_NAME)
-public class Facebook
+public class GetLog
 {
 	@In(1)
-	String authCode;	
-	@Out(1)
-	String authToken;
-	@Out(2)
 	String fbId;
-	@Out(3)
-	String fbName;
-	@Out(4)
-	ArrayList<FacebookFriendType> fbFriends;
+	
+	@Out(1)
+	ArrayList<GetLogType> results;
 }

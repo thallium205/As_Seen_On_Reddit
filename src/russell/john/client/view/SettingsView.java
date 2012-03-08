@@ -33,9 +33,11 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.user.client.ui.Label;
 
 /**
- * The main page the appliction.  Its where they specify their settings and perform the action.
+ * The main page the appliction. Its where they specify their settings and
+ * perform the action.
+ * 
  * @author John
- *
+ * 
  */
 public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> implements SettingsPresenter.MyView
 {
@@ -70,17 +72,13 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 
 	private void setUiHandlers()
 	{
-		chkEveryone.setValue(true);
-		cellTable.setVisible(false);	
-		
 		chkEveryone.addClickHandler(new ClickHandler()
 		{
 
 			@Override
 			public void onClick(ClickEvent event)
 			{
-				@SuppressWarnings("deprecation")
-				boolean checked = ((CheckBox) event.getSource()).isChecked();
+				boolean checked = ((CheckBox) event.getSource()).getValue();
 
 				if (checked)
 				{
@@ -102,6 +100,7 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 	{
 		if (getUiHandlers() != null)
 		{
+			btnApply.setEnabled(false);
 			getUiHandlers().onBtnApply();
 		}
 	}
@@ -121,6 +120,7 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 
 	/**
 	 * The table that holds the basic friends list.
+	 * 
 	 * @param result
 	 */
 	private void setTable(FacebookResult result)
@@ -222,12 +222,21 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 
 	@Override
 	public void setSettingsInfo(GetSettingsResult result)
-	{		
-		if (result.getFriends() == null)
-			chkEveryone.setValue(true);	
-		
+	{
+		// If there are custom victims defined, then we show the table. Else, we
+		// hide the table
+		if (result.getFriends() == null || result.getFriends().isEmpty())
+		{
+			chkEveryone.setValue(true);
+			cellTable.setVisible(false);
+		}
+
+		// This means they have a custom victim list.
 		else
 		{
+			chkEveryone.setValue(false);
+			cellTable.setVisible(true);
+
 			boxText.setText(result.getComment());
 			// Due to facebook policy I am only allowed to store people's user
 			// ids.
@@ -281,6 +290,7 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 	@Override
 	public void setApplyConfirm(String text)
 	{
+		btnApply.setEnabled(true);
 		lblApplyConfirm.setText(text);
 	}
 }

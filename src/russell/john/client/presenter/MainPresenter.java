@@ -51,12 +51,12 @@ public class MainPresenter extends Presenter<MainPresenter.MyView, MainPresenter
 	}
 
 	@Inject
-	public MainPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, final DispatchAsync dispatcher, final SideMenuPresenter sideMenuPresenter)
+	public MainPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, final DispatchAsync dispatcher, final SideMenuPresenter side)
 	{
 		super(eventBus, view, proxy);
 		
-		this.sideMenuPresenter = sideMenuPresenter;
-
+		this.sideMenuPresenter = side;
+		
 		// We need to authenticate with facebook
 		if (Window.Location.getParameter("code") != null)
 		{

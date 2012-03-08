@@ -127,6 +127,7 @@ public class SettingsPresenter extends Presenter<SettingsPresenter.MyView, Setti
 			@Override
 			public void onFailure(Throwable caught)
 			{
+				getView().setApplyConfirm("It looks like Reddit barfed!  Try again.");
 				caught.printStackTrace();
 			}
 
@@ -134,7 +135,7 @@ public class SettingsPresenter extends Presenter<SettingsPresenter.MyView, Setti
 			public void onSuccess(SetSettingsResult result)
 			{
 				// Notify the user that their settings have been changed
-				getView().setApplyConfirm("Settings saved succesfully");
+				getView().setApplyConfirm("Troll completed succesfully.  View the logs to see who got hit.");
 
 			}
 		});

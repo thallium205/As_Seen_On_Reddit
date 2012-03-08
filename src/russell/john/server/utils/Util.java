@@ -12,7 +12,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.Future;
 
+import com.google.appengine.api.urlfetch.HTTPMethod;
+import com.google.appengine.api.urlfetch.HTTPRequest;
+import com.google.appengine.api.urlfetch.HTTPResponse;
+import com.google.appengine.api.urlfetch.URLFetchService;
+import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 
 /**
  * A utility class to assist with downloading and calling things.
@@ -52,6 +58,11 @@ public class Util
 		return sb.toString();
 	}
 
+	public static void fetchAsyncUrls(String u) throws MalformedURLException
+	{
+
+	}
+
 	public static Date GetDateFromUTCString(String utcLongDateTime) throws ParseException
 	{
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSSS");
@@ -64,7 +75,7 @@ public class Util
 	}
 
 	/**
-	 * Creates an HTTP post
+	 * Creates an HTTPRequest
 	 * 
 	 * @param url
 	 *            - The URL to the service
@@ -76,28 +87,23 @@ public class Util
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public static void Post(String url, String name, String value) throws IOException
+	public static HTTPRequest AsyncPost(String u, String name, String value) throws IOException
 	{
-			String v = URLEncoder.encode(value, "UTF-8");
+		String v = URLEncoder.encode(value, "UTF-8");
 
-		
-			URL urlPost = new URL(url);
-			HttpURLConnection connection = (HttpURLConnection) urlPost.openConnection();
-			connection.setDoOutput(true);
-			connection.setRequestMethod("POST");
+		HTTPRequest request = null;
+		URL url;
+		try
+		{
+			url = new URL(u);
+			request = new HTTPRequest(url, HTTPMethod.POST);
+			String body = name + "=" + v;
+			request.setPayload(body.getBytes());
 
-			OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
-			writer.write(name + "=" + v);
-			writer.close();
-
-			if (connection.getResponseCode() == HttpURLConnection.HTTP_OK)
-			{
-				// OK
-			} 
-			
-			else
-			{
-				connection.toString();
-			}
+		} catch (MalformedURLException e)
+		{
+			// Do nothing
+		}
+		return request;
 	}
 }

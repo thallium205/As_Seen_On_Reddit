@@ -149,19 +149,16 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 		// url futures return back
 		ArrayList<JSONObject> fbFeedItems = new ArrayList<JSONObject>();
 
-		// Get the user's feed
-		LOG.warning("Get the user's feed");
+		// Get the user's feed		
 		JSONArray feed = new JSONObject(Util.fetchUrl(LinkUtils.getFeedListUrl(settings.getAuthToken()))).getJSONArray("data");
 		for (int i = 0; i < feed.length(); i++)
 		{
 			JSONObject feedItem = feed.getJSONObject(i);
-			// We are only interested in links
-			LOG.warning("We are only interested in links");
+			// We are only interested in links			
 			if (feedItem.getString("type").contains("link"))
 			{
 				// Check to make sure the feed item happened after the last time
-				// the user fired the event
-				LOG.warning("Check to make sure the feed item happened after the last time");
+				// the user fired the event				
 				if (Util.GetGMTDateFromUTCString(feedItem.getString("created_time")).after(settings.getLastCheckedDate()))
 				{
 					// Check user specific list
@@ -178,15 +175,13 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 					if (userMatch)
 					{
 						// Because reddit's search is horrible, we are going to
-						// do an async pull from their api.
-						LOG.warning("Because reddit's search is horrible, we are going to");
+						// do an async pull from their api.						
 						redditUrls.add(LinkUtils.getRedditSearchUrl(feedItem.getString("link")));
 
 						// We add this feed item to this arraylist so that when
 						// the spawned url futures return, we can find it based
 						// upon the url and post the witty response to the
-						// correct comment
-						LOG.warning("We add this feed item to this arraylist so that when");
+						// correct comment						
 						fbFeedItems.add(feedItem);
 					}
 				}
@@ -196,8 +191,7 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 		// Process all the collected reddit urls at once. Google will let us do
 		// a max of 10, so if there are more than 10 in this arraylist we will
 		// stop. This is the limitation of the app due to reddit. We will give
-		// reddit 25 seconds to perform all the searches.
-		LOG.warning("Process all the collected reddit urls at once. Google will let us do");
+		// reddit 25 seconds to perform all the searches.		
 		URLFetchService fetcher = URLFetchServiceFactory.getURLFetchService();
 		FetchOptions fetchOptions = FetchOptions.Builder.withDeadline(500);
 		ArrayList<Future<HTTPResponse>> asyncRedditResponses = new ArrayList<Future<HTTPResponse>>();
@@ -211,8 +205,7 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 				break;
 		}
 
-		// We now wait for all 10 to come (hopefully) pouring in at once
-		LOG.warning("We now wait for all 10 to come (hopefully) pouring in at once");
+		// We now wait for all 10 to come (hopefully) pouring in at once		
 		for (Future<HTTPResponse> future : asyncRedditResponses)
 		{
 			HTTPResponse response;
@@ -220,17 +213,13 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 			// We are giving reddit 25 seconds to perform all the search
 			// operations. The maximum is 30, with 5 seconds reserved for
 			// facebook and server overhead.
-			LOG.warning("We are giving reddit 25 seconds to perform all the search");
 			response = future.get(); // We wait now.
-			LOG.warning("We finished waiting now.");
-			LOG.warning("Create redditSearchResult");
 			String result = new String(response.getContent());
-			LOG.warning("Result is: " + result);
 			JSONObject redditObject = new JSONObject(new String(response.getContent()));
 			JSONArray redditSearchResult;
 			if (redditObject.has("error"))
 			{
-				LOG.severe("Reddit spit back an error! " + redditObject.toString());
+				LOG.severe(redditObject.toString());
 				continue;
 			}
 
@@ -239,7 +228,6 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 				redditSearchResult = redditObject.getJSONObject("data").getJSONArray("children");
 			}
 
-			LOG.warning("Populate scores");
 			ArrayList<Integer> scores = new ArrayList<Integer>();
 			for (int i = 0; i < redditSearchResult.length(); i++)
 			{
@@ -247,11 +235,9 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 				scores.add(item.getInt("score"));
 			}
 
-			LOG.warning("Begin sort");
 			// Sort the list of scores desc
 			Collections.sort(scores);
 			Collections.reverse(scores);
-			LOG.warning("End sort");
 
 			// Find the JSONObject with this score and get its link
 			for (Iterator<JSONObject> iter = fbFeedItems.iterator(); iter.hasNext();)
@@ -263,7 +249,6 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 					
 					if (redditItem.getInt("score") == scores.get(0) && fbFeedItem.getString("link").contains(redditItem.getString("url")))
 					{
-						LOG.warning("Match! " + redditItem.getString("url"));
 						// We found the match. Comment it to the person's
 						// link post. This needs to be done
 						// asynchronously/ASAP in order to benefit from the
@@ -277,10 +262,8 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 
 						// Get a new fetcher reference
 						fetcher = URLFetchServiceFactory.getURLFetchService();
-						LOG.warning("Start fb async call");
 						fetcher.fetchAsync(Util.AsyncPost(LinkUtils.getPostCommentUrl(settings.getAuthToken(), fbFeedItem.getString("id")),
 								"message", fbComment));
-						LOG.warning("Stop fb async call");
 
 						// Store the log in the database asynchronously
 						LogDAO logDao = new LogDAO();
@@ -291,9 +274,7 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 						log.setFbCommentPermalink("http://facebook.com/" + fbFeedItem.getString("id").split("_")[0] + "/posts/"
 								+ fbFeedItem.getString("id").split("_")[1]);
 						log.setDate(Util.GetDate());
-						LOG.warning("Start db async call");
 						logDao.ofy().async().put(log);
-						LOG.warning("Stop db async call");
 
 						// Break out of the loop to prevent double posting.
 						// This happens if the two friends post the same

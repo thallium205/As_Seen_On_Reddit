@@ -1,6 +1,7 @@
 package russell.john.client.presenter;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -128,15 +129,20 @@ public class SettingsPresenter extends Presenter<SettingsPresenter.MyView, Setti
 			@Override
 			public void onFailure(Throwable caught)
 			{
-				getView().setApplyConfirm("It looks like Reddit barfed!  Try again.");
-				caught.printStackTrace();
+				getView().setApplyConfirm("It looks like Reddit barfed!  Details: " + caught.getMessage());
 			}
 
 			@Override
 			public void onSuccess(SetSettingsResult result)
 			{
 				// Notify the user that their settings have been changed
-				getView().setApplyConfirm("Success!  View the logs to see who got hit.");
+				StringBuilder builder = new StringBuilder();
+				builder.append("Completed Succesfully. View the log for details.  \n");
+				builder.append("Total Link Matches: " + result.getLinksMatched() + "\n");
+				builder.append("Links checked from your feed against Reddit:\n");
+				for (Iterator<String> iter = result.getLinksChecked().iterator(); iter.hasNext();)				
+					builder.append(iter.next() + "\n");						
+				getView().setApplyConfirm(builder.toString());
 
 			}
 		});

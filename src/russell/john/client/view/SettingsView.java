@@ -30,7 +30,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextArea;
 
 /**
  * The main page the appliction. Its where they specify their settings and
@@ -49,8 +49,7 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 	Button btnApply;
 	@UiField(provided = true)
 	CellTable<FacebookFriendType> cellTable = new CellTable<FacebookFriendType>();
-	@UiField
-	Label lblApplyConfirm;
+	@UiField TextArea lblApplyConfirm;
 	private final Widget widget;
 
 	ListDataProvider<FacebookFriendType> dataProvider = new ListDataProvider<FacebookFriendType>();

@@ -1,21 +1,16 @@
 package russell.john.server.handler;
 
-import java.io.IOException;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import russell.john.server.dao.LogDAO;
@@ -83,10 +78,7 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 
 		try
 		{
-			setUserSettingsAndTroll(action);
-			// We don't care because we don't return anything after a user sets
-			// their settings
-			return new SetSettingsResult();
+			return setUserSettingsAndTroll(action);
 		}
 
 		catch (Exception e)
@@ -125,13 +117,16 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 	 * @param action
 	 * @throws Exception 
 	 */
-	private void setUserSettingsAndTroll(final SetSettingsAction action) throws Exception 
+	private SetSettingsResult setUserSettingsAndTroll(final SetSettingsAction action) throws Exception 
 	{
-		// Save the user to the datastore, and also get the user for authtoken
+		// Get th user's auth token
 		SettingsDAO settingsDao = new SettingsDAO();
 		UserSettings settings = settingsDao.ofy().query(UserSettings.class).filter("fbId", action.getFbId()).get();
 		settings.setComment(action.getComment());
 		settings.setFriends(action.getFriends());
+		
+		// The amount of times we posted on someone's wall
+		int match = 0;
 
 		// A collection of all the reddit search URLs. This is needed to do an
 		// async call since the reddit search latency is
@@ -184,16 +179,12 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 		// stop. This is the limitation of the app due to reddit. We will give
 		// reddit 25 seconds to perform all the searches.		
 		URLFetchService fetcher = URLFetchServiceFactory.getURLFetchService();
-		FetchOptions fetchOptions = FetchOptions.Builder.withDeadline(500);
+		FetchOptions fetchOptions = FetchOptions.Builder.withDeadline(500).followRedirects();
 		ArrayList<Future<HTTPResponse>> asyncRedditResponses = new ArrayList<Future<HTTPResponse>>();
 		for (int i = 0; i < redditUrls.size(); i++)
 		{
-			if (i < 10)
-			{
-				HTTPRequest request = new HTTPRequest(new URL(redditUrls.get(i)), HTTPMethod.GET, fetchOptions);
-				asyncRedditResponses.add(fetcher.fetchAsync(request));
-			} else
-				break;
+			HTTPRequest request = new HTTPRequest(new URL("http://ineedaride.mobi/reddit.php?redditUrl=" + redditUrls.get(i)), HTTPMethod.GET, fetchOptions);
+			asyncRedditResponses.add(fetcher.fetchAsync(request));
 		}
 
 		// We now wait for all 10 to come (hopefully) pouring in at once		
@@ -250,8 +241,7 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 						// Post it to the user's wall asynchronously
 						String fbComment = action.getComment() + " " + redditPermalink;
 
-						// Get a new fetcher reference
-						fetcher = URLFetchServiceFactory.getURLFetchService();
+						// Get a new fetcher reference					
 						fetcher.fetchAsync(Util.AsyncPost(LinkUtils.getPostCommentUrl(settings.getAuthToken(), fbFeedItem.getString("id")),
 								"message", fbComment));
 
@@ -265,6 +255,9 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 								+ fbFeedItem.getString("id").split("_")[1]);
 						log.setDate(Util.GetDate());
 						logDao.ofy().async().put(log);
+						
+						//Increment the times we found a positive match.  this is for the user
+						match ++;
 
 						// Break out of the loop to prevent double posting.
 						// This happens if the two friends post the same
@@ -278,5 +271,7 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 		// Store the new timestamp from the usersettings in the database
 		settings.setLastCheckedDate(Util.GetDate());
 		settingsDao.put(settings);
+		
+		return new SetSettingsResult(redditUrls, match);
 	}
 }

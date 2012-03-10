@@ -74,7 +74,6 @@ public class LogView extends ViewImpl implements LogPresenter.MyView
 
 		else
 		{
-
 			TextColumn<GetLogType> victimColumn = new TextColumn<GetLogType>()
 			{
 				@Override

@@ -3,7 +3,9 @@ package russell.john.shared.action;
 import java.util.ArrayList;
 
 import com.gwtplatform.dispatch.annotation.GenDispatch;
+import com.gwtplatform.dispatch.annotation.GenDto;
 import com.gwtplatform.dispatch.annotation.In;
+import com.gwtplatform.dispatch.annotation.Out;
 import com.gwtplatform.dispatch.shared.ActionImpl;
 
 /**
@@ -11,6 +13,7 @@ import com.gwtplatform.dispatch.shared.ActionImpl;
  * @author John
  *
  */
+@GenDto
 @GenDispatch(isSecure = false, serviceName = ActionImpl.DEFAULT_SERVICE_NAME)
 public class SetSettings
 {
@@ -23,4 +26,10 @@ public class SetSettings
 	
 	@In(3)
 	ArrayList<String> friends;
+	
+	@Out(1)
+	ArrayList<String> linksChecked;
+	
+	@Out(2)
+	int linksMatched;
 }

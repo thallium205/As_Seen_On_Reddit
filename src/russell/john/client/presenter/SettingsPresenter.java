@@ -51,22 +51,21 @@ public class SettingsPresenter extends Presenter<SettingsPresenter.MyView, Setti
 		// The presenter asks the veiw to get all the selected users to troll.
 		public ArrayList<String> getSelectedUsers();
 
-		// Called when the server has returned a success.
+		// Called when the server has returned something
 		public void setApplyConfirm(String text);
 	}
 
 	@ProxyEvent
 	@Override
 	public void onFacebookResultReceived(FacebookResultReceivedEvent event)
-	{
-		forceReveal();
+	{		
 		fbResultEvent = event;
 		
 		getView().setUiHandlers(this);
 		
 		getView().setFacebookInfo(event.getFbResult());
 
-		getPersonalSettings();
+		getPersonalSettings();	
 	}
 
 	@ProxyCodeSplit
@@ -81,6 +80,7 @@ public class SettingsPresenter extends Presenter<SettingsPresenter.MyView, Setti
 		super(eventBus, view, proxy);
 
 		this.dispatcher = dispatcher;
+		
 	}
 
 	@Override
@@ -106,13 +106,14 @@ public class SettingsPresenter extends Presenter<SettingsPresenter.MyView, Setti
 			@Override
 			public void onFailure(Throwable caught)
 			{
-				caught.printStackTrace();
+				getView().setApplyConfirm("Reddit barfed.");
 			}
 
 			@Override
 			public void onSuccess(GetSettingsResult result)
 			{
 				getView().setSettingsInfo(result);
+				forceReveal();
 			}
 		});
 	}
@@ -135,7 +136,7 @@ public class SettingsPresenter extends Presenter<SettingsPresenter.MyView, Setti
 			public void onSuccess(SetSettingsResult result)
 			{
 				// Notify the user that their settings have been changed
-				getView().setApplyConfirm("Troll completed succesfully.  View the logs to see who got hit.");
+				getView().setApplyConfirm("Success!  View the logs to see who got hit.");
 
 			}
 		});

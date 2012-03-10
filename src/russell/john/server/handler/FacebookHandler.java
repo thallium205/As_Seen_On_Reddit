@@ -1,5 +1,6 @@
 package russell.john.server.handler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.servlet.ServletContext;
@@ -49,10 +50,12 @@ public class FacebookHandler implements ActionHandler<FacebookAction, FacebookRe
 		ArrayList<FacebookFriendType> fbFriends = new ArrayList<FacebookFriendType>();
 		// We need to get an auth token from facebook
 		final String url = LinkUtils.getAccessTokenUrl(action.getAuthCode());
-		final String authToken = Util.fetchUrl(url);
+		final String authToken;
 
 		try
 		{
+			authToken = Util.fetchUrl(url);
+			
 			// Get the users info
 			JSONObject me = new JSONObject(Util.fetchUrl(LinkUtils.getMeUrl(authToken)));
 			fbId = me.getString("id");
@@ -67,7 +70,12 @@ public class FacebookHandler implements ActionHandler<FacebookAction, FacebookRe
 		catch (JSONException e)
 		{
 			e.printStackTrace();
-			throw new ActionException(url, e);
+			throw new ActionException("The problem url was: " + url, e);
+		}
+		
+		catch (IOException e)
+		{
+			throw new ActionException("Error getting URL", e);
 		}
 
 		// Store

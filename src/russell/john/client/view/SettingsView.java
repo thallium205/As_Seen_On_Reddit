@@ -100,6 +100,7 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 	{
 		if (getUiHandlers() != null)
 		{
+			lblApplyConfirm.setText("Working... please wait.");
 			btnApply.setEnabled(false);
 			getUiHandlers().onBtnApply();
 		}
@@ -223,6 +224,10 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 	@Override
 	public void setSettingsInfo(GetSettingsResult result)
 	{
+		// Display the time
+		lblApplyConfirm.setText("Last used: " + result.getLastCheckedDate().toString() + ".  Any posts made by your friends before this date will be skipped to prevent duplicates.");
+		
+		
 		// If there are custom victims defined, then we show the table. Else, we
 		// hide the table
 		if (result.getFriends() == null || result.getFriends().isEmpty())

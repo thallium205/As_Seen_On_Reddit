@@ -64,152 +64,163 @@ public class LogView extends ViewImpl implements LogPresenter.MyView
 	 */
 	private void setTable(GetLogResult result)
 	{
-
-		TextColumn<GetLogType> victimColumn = new TextColumn<GetLogType>()
+		if (cellTable.getColumnCount() == 4)
 		{
-			@Override
-			public String getValue(GetLogType log)
-			{
-				if (log.getFbVictimName() != null)
-					return log.getFbVictimName();
-				else
-					return "";
-			}
-		};
-		victimColumn.setSortable(true);
+			dataList.clear();
+			dataList = dataProvider.getList();
+			for (GetLogType friend : result.getResults())
+				dataList.add(friend);
+		}
 
-		TextColumn<GetLogType> commentPermalink = new TextColumn<GetLogType>()
-		{
-			@Override
-			public String getValue(GetLogType log)
-			{
-				if (log.getFbCommentPermalink() != null)
-					return log.getFbCommentPermalink();
-				else
-					return "";
-			}
-		};
-		commentPermalink.setSortable(true);
-
-		TextColumn<GetLogType> comment = new TextColumn<GetLogType>()
-		{
-			@Override
-			public String getValue(GetLogType log)
-			{
-				if (log.getFbComment() != null)
-					return log.getFbComment();
-				else
-					return "";
-			}
-		};
-		comment.setSortable(true);
-
-		TextColumn<GetLogType> date = new TextColumn<GetLogType>()
-		{
-			@Override
-			public String getValue(GetLogType log)
-			{
-				if (log.getDate() != null)
-					return log.getDate().toString();
-				else
-					return "";
-			}
-		};
-		date.setSortable(true);
-
-		cellTable.addColumn(victimColumn, "Name");
-		cellTable.addColumn(commentPermalink, "Comment Link");
-		cellTable.addColumn(comment, "Comment Text");
-		cellTable.addColumn(date, "Time");
-
-		// Attach provider
-		dataProvider.addDataDisplay(cellTable);
-		dataList = dataProvider.getList();
-		for (GetLogType friend : result.getResults())
-			dataList.add(friend);
-
-		ListHandler<GetLogType> columnSortHandler = new ListHandler<GetLogType>(dataList);
-		columnSortHandler.setComparator(victimColumn, new Comparator<GetLogType>()
+		else
 		{
 
-			@Override
-			public int compare(GetLogType o1, GetLogType o2)
+			TextColumn<GetLogType> victimColumn = new TextColumn<GetLogType>()
 			{
-				if (o1 == o2)
+				@Override
+				public String getValue(GetLogType log)
 				{
-					return 0;
+					if (log.getFbVictimName() != null)
+						return log.getFbVictimName();
+					else
+						return "";
 				}
+			};
+			victimColumn.setSortable(true);
 
-				// Compare the name columns.
-				if (o1 != null)
-				{
-					return (o2 != null) ? o1.getFbVictimName().compareTo(o2.getFbVictimName()) : 1;
-				}
-				return -1;
-			}
-		});
-
-		columnSortHandler.setComparator(commentPermalink, new Comparator<GetLogType>()
-		{
-
-			@Override
-			public int compare(GetLogType o1, GetLogType o2)
+			TextColumn<GetLogType> commentPermalink = new TextColumn<GetLogType>()
 			{
-				if (o1 == o2)
+				@Override
+				public String getValue(GetLogType log)
 				{
-					return 0;
+					if (log.getFbCommentPermalink() != null)
+						return log.getFbCommentPermalink();
+					else
+						return "";
 				}
+			};
+			commentPermalink.setSortable(true);
 
-				// Compare the role columns.
-				if (o1 != null)
-				{
-					return (o2 != null) ? o1.getFbCommentPermalink().compareTo(o2.getFbCommentPermalink()) : 1;
-				}
-				return -1;
-			}
-		});
-
-		columnSortHandler.setComparator(comment, new Comparator<GetLogType>()
-		{
-			@Override
-			public int compare(GetLogType o1, GetLogType o2)
+			TextColumn<GetLogType> comment = new TextColumn<GetLogType>()
 			{
-				if (o1 == o2)
+				@Override
+				public String getValue(GetLogType log)
 				{
-					return 0;
+					if (log.getFbComment() != null)
+						return log.getFbComment();
+					else
+						return "";
 				}
+			};
+			comment.setSortable(true);
 
-				// Compare the role columns.
-				if (o1 != null)
-				{
-					return (o2 != null) ? o1.getFbComment().compareTo(o2.getFbComment()) : 1;
-				}
-				return -1;
-			}
-		});
-
-		columnSortHandler.setComparator(date, new Comparator<GetLogType>()
-		{
-
-			@Override
-			public int compare(GetLogType o1, GetLogType o2)
+			TextColumn<GetLogType> date = new TextColumn<GetLogType>()
 			{
-				if (o1 == o2)
+				@Override
+				public String getValue(GetLogType log)
 				{
-					return 0;
+					if (log.getDate() != null)
+						return log.getDate().toString();
+					else
+						return "";
 				}
+			};
+			date.setSortable(true);
 
-				// Compare the role columns.
-				if (o1 != null)
+			cellTable.addColumn(victimColumn, "Name");
+			cellTable.addColumn(commentPermalink, "Comment Link");
+			cellTable.addColumn(comment, "Comment Text");
+			cellTable.addColumn(date, "Time");
+
+			// Attach provider
+			dataProvider.addDataDisplay(cellTable);
+			dataList = dataProvider.getList();
+			for (GetLogType friend : result.getResults())
+				dataList.add(friend);
+
+			ListHandler<GetLogType> columnSortHandler = new ListHandler<GetLogType>(dataList);
+			columnSortHandler.setComparator(victimColumn, new Comparator<GetLogType>()
+			{
+
+				@Override
+				public int compare(GetLogType o1, GetLogType o2)
 				{
-					return (o2 != null) ? o1.getDate().compareTo(o2.getDate()) : 1;
-				}
-				return -1;
-			}
-		});
+					if (o1 == o2)
+					{
+						return 0;
+					}
 
-		cellTable.addColumnSortHandler(columnSortHandler);
-		cellTable.getColumnSortList().push(date);
-		cellTable.setPageSize(5000);
+					// Compare the name columns.
+					if (o1 != null)
+					{
+						return (o2 != null) ? o1.getFbVictimName().compareTo(o2.getFbVictimName()) : 1;
+					}
+					return -1;
+				}
+			});
+
+			columnSortHandler.setComparator(commentPermalink, new Comparator<GetLogType>()
+			{
+
+				@Override
+				public int compare(GetLogType o1, GetLogType o2)
+				{
+					if (o1 == o2)
+					{
+						return 0;
+					}
+
+					// Compare the role columns.
+					if (o1 != null)
+					{
+						return (o2 != null) ? o1.getFbCommentPermalink().compareTo(o2.getFbCommentPermalink()) : 1;
+					}
+					return -1;
+				}
+			});
+
+			columnSortHandler.setComparator(comment, new Comparator<GetLogType>()
+			{
+				@Override
+				public int compare(GetLogType o1, GetLogType o2)
+				{
+					if (o1 == o2)
+					{
+						return 0;
+					}
+
+					// Compare the role columns.
+					if (o1 != null)
+					{
+						return (o2 != null) ? o1.getFbComment().compareTo(o2.getFbComment()) : 1;
+					}
+					return -1;
+				}
+			});
+
+			columnSortHandler.setComparator(date, new Comparator<GetLogType>()
+			{
+
+				@Override
+				public int compare(GetLogType o1, GetLogType o2)
+				{
+					if (o1 == o2)
+					{
+						return 0;
+					}
+
+					// Compare the role columns.
+					if (o1 != null)
+					{
+						return (o2 != null) ? o1.getDate().compareTo(o2.getDate()) : 1;
+					}
+					return -1;
+				}
+			});
+
+			cellTable.addColumnSortHandler(columnSortHandler);
+			cellTable.getColumnSortList().push(date);
+			cellTable.setPageSize(5000);
+		}
 	}
 }

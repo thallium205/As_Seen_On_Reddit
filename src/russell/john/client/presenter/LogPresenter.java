@@ -64,8 +64,7 @@ public class LogPresenter extends Presenter<LogPresenter.MyView, LogPresenter.My
 	@Override
 	protected void onBind()
 	{
-		super.onBind();
-		
+		super.onBind();		
 	}
 	
 	@Override
@@ -92,7 +91,8 @@ public class LogPresenter extends Presenter<LogPresenter.MyView, LogPresenter.My
 			@Override
 			public void onSuccess(GetLogResult result)
 			{
-				getView().setLogInfo(result);
+				if (result != null)
+					getView().setLogInfo(result);
 			}
 		});
 	}

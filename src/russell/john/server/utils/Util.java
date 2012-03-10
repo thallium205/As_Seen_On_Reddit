@@ -1,10 +1,6 @@
 package russell.john.server.utils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -12,8 +8,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.concurrent.Future;
 
+import com.google.appengine.api.urlfetch.FetchOptions;
 import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.appengine.api.urlfetch.HTTPRequest;
 import com.google.appengine.api.urlfetch.HTTPResponse;
@@ -28,34 +24,13 @@ import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
  */
 public class Util
 {
-	public static String fetchUrl(String url)
+	public static String fetchUrl(String url) throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-
-		try
-		{
-			URL u = new URL(url);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(u.openStream()));
-			String line;
-
-			while ((line = reader.readLine()) != null)
-			{
-				sb.append(line);
-			}
-			reader.close();
-		}
-
-		catch (MalformedURLException e)
-		{
-			e.printStackTrace();
-		}
-
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-
-		return sb.toString();
+		URLFetchService fetcher = URLFetchServiceFactory.getURLFetchService();
+		FetchOptions fetchOptions = FetchOptions.Builder.followRedirects().validateCertificate();
+		HTTPRequest request = new HTTPRequest(new URL(url), HTTPMethod.GET, fetchOptions);			
+		HTTPResponse response = fetcher.fetch(request);	
+		return new String(response.getContent());		
 	}
 
 	public static void fetchAsyncUrls(String u) throws MalformedURLException
@@ -63,9 +38,10 @@ public class Util
 
 	}
 
-	public static Date GetDateFromUTCString(String utcLongDateTime) throws ParseException
+	public static Date GetGMTDateFromUTCString(String utcLongDateTime) throws ParseException
 	{
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSSS");
+		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 		return new Date(dateFormat.parse(utcLongDateTime).getTime());
 	}
 

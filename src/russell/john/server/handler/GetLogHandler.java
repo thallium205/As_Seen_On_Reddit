@@ -1,7 +1,7 @@
 package russell.john.server.handler;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 
 import javax.servlet.ServletContext;
@@ -20,8 +20,6 @@ import russell.john.shared.action.FacebookFriendType;
 import russell.john.shared.action.GetLogAction;
 import russell.john.shared.action.GetLogResult;
 import russell.john.shared.action.GetLogType;
-import russell.john.shared.action.GetSettingsAction;
-import russell.john.shared.action.GetSettingsResult;
 import russell.john.shared.utils.LinkUtils;
 
 import com.google.appengine.api.datastore.QueryResultIterable;
@@ -75,6 +73,11 @@ public class GetLogHandler implements ActionHandler<GetLogAction, GetLogResult>
 		catch (JSONException e)
 		{
 			throw new ActionException("Error getting the log", e);
+		} 
+		
+		catch (IOException e)
+		{
+			throw new ActionException("Error with the URL", e);
 		}
 		
 		// Resolve the vbVictimIds to the names and create a sendable log item as inneficiently as possible since I'm lazy

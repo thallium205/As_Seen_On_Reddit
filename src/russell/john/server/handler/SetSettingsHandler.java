@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -63,6 +63,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetSettingsResult>
 {
 	// private Provider<HttpServletRequest> requestProvider;
+	private static final Logger LOG = Logger.getLogger(SetSettingsHandler.class.getName());
 
 	/**
 	 * Injection to get the request provider. Needed in certain situations.
@@ -79,52 +80,22 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 	@Override
 	public SetSettingsResult execute(final SetSettingsAction action, final ExecutionContext context) throws ActionException
 	{
-		
-			try
-			{
-				setUserSettingsAndTroll(action);
-			} 
-			
-			catch (JSONException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			
-			catch (ParseException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			
-			catch (IOException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			
-			catch (InterruptedException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			
-			catch (ExecutionException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			
-			catch (TimeoutException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		
 
-		// We don't care because we don't return anything after a user sets
-		// their settings
-		return new SetSettingsResult();
+		try
+		{
+			setUserSettingsAndTroll(action);
+			// We don't care because we don't return anything after a user sets
+			// their settings
+			return new SetSettingsResult();
+		}
+
+		catch (Exception e)
+		{
+			throw new ActionException(e);
+		}
+
+
+		
 	}
 
 	/**
@@ -155,12 +126,13 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 	 * @throws JSONException
 	 * @throws ParseException
 	 * @throws IOException
-	 * @throws TimeoutException 
-	 * @throws ExecutionException 
-	 * @throws InterruptedException 
+	 * @throws TimeoutException
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * @throws ClientProtocolException
 	 */
-	private void setUserSettingsAndTroll(final SetSettingsAction action) throws JSONException, ParseException, IOException, InterruptedException, ExecutionException, TimeoutException
+	private void setUserSettingsAndTroll(final SetSettingsAction action) throws JSONException, ParseException, IOException, InterruptedException,
+			ExecutionException, TimeoutException
 	{
 		// Save the user to the datastore, and also get the user for authtoken
 		SettingsDAO settingsDao = new SettingsDAO();
@@ -178,19 +150,22 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 		ArrayList<JSONObject> fbFeedItems = new ArrayList<JSONObject>();
 
 		// Get the user's feed
+		LOG.warning("Get the user's feed");
 		JSONArray feed = new JSONObject(Util.fetchUrl(LinkUtils.getFeedListUrl(settings.getAuthToken()))).getJSONArray("data");
 		for (int i = 0; i < feed.length(); i++)
 		{
 			JSONObject feedItem = feed.getJSONObject(i);
 			// We are only interested in links
+			LOG.warning("We are only interested in links");
 			if (feedItem.getString("type").contains("link"))
 			{
 				// Check to make sure the feed item happened after the last time
 				// the user fired the event
-
-				if (Util.GetDateFromUTCString(feedItem.getString("created_time")).after(settings.getLastCheckedDate()))
+				LOG.warning("Check to make sure the feed item happened after the last time");
+				if (Util.GetGMTDateFromUTCString(feedItem.getString("created_time")).after(settings.getLastCheckedDate()))
 				{
 					// Check user specific list
+					LOG.warning("Check user specific list");
 					Boolean userMatch = false;
 					if (settings.getFriends() == null || settings.getFriends().isEmpty())
 						userMatch = true;
@@ -199,17 +174,19 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 						if (feedItem.getJSONObject("from").getString("id").contains(iter.next()))
 							userMatch = true;
 					}
-					
+
 					if (userMatch)
 					{
 						// Because reddit's search is horrible, we are going to
 						// do an async pull from their api.
+						LOG.warning("Because reddit's search is horrible, we are going to");
 						redditUrls.add(LinkUtils.getRedditSearchUrl(feedItem.getString("link")));
 
 						// We add this feed item to this arraylist so that when
 						// the spawned url futures return, we can find it based
 						// upon the url and post the witty response to the
 						// correct comment
+						LOG.warning("We add this feed item to this arraylist so that when");
 						fbFeedItems.add(feedItem);
 					}
 				}
@@ -218,22 +195,24 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 
 		// Process all the collected reddit urls at once. Google will let us do
 		// a max of 10, so if there are more than 10 in this arraylist we will
-		// stop.  This is the limitation of the app due to reddit.  We will give reddit 25 seconds to perform all the searches.
+		// stop. This is the limitation of the app due to reddit. We will give
+		// reddit 25 seconds to perform all the searches.
+		LOG.warning("Process all the collected reddit urls at once. Google will let us do");
 		URLFetchService fetcher = URLFetchServiceFactory.getURLFetchService();
 		FetchOptions fetchOptions = FetchOptions.Builder.withDeadline(500);
 		ArrayList<Future<HTTPResponse>> asyncRedditResponses = new ArrayList<Future<HTTPResponse>>();
 		for (int i = 0; i < redditUrls.size(); i++)
 		{
 			if (i < 10)
-			{				
-				HTTPRequest request = new HTTPRequest(new URL(redditUrls.get(i)), HTTPMethod.GET, fetchOptions);				
+			{
+				HTTPRequest request = new HTTPRequest(new URL(redditUrls.get(i)), HTTPMethod.GET, fetchOptions);
 				asyncRedditResponses.add(fetcher.fetchAsync(request));
-			}
-			else
+			} else
 				break;
 		}
 
 		// We now wait for all 10 to come (hopefully) pouring in at once
+		LOG.warning("We now wait for all 10 to come (hopefully) pouring in at once");
 		for (Future<HTTPResponse> future : asyncRedditResponses)
 		{
 			HTTPResponse response;
@@ -241,9 +220,26 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 			// We are giving reddit 25 seconds to perform all the search
 			// operations. The maximum is 30, with 5 seconds reserved for
 			// facebook and server overhead.
+			LOG.warning("We are giving reddit 25 seconds to perform all the search");
 			response = future.get(); // We wait now.
-			JSONArray redditSearchResult = new JSONObject(new String(response.getContent())).getJSONObject("data").getJSONArray("children");
+			LOG.warning("We finished waiting now.");
+			LOG.warning("Create redditSearchResult");
+			String result = new String(response.getContent());
+			LOG.warning("Result is: " + result);
+			JSONObject redditObject = new JSONObject(new String(response.getContent()));
+			JSONArray redditSearchResult;
+			if (redditObject.has("error"))
+			{
+				LOG.severe("Reddit spit back an error! " + redditObject.toString());
+				continue;
+			}
 
+			else
+			{
+				redditSearchResult = redditObject.getJSONObject("data").getJSONArray("children");
+			}
+
+			LOG.warning("Populate scores");
 			ArrayList<Integer> scores = new ArrayList<Integer>();
 			for (int i = 0; i < redditSearchResult.length(); i++)
 			{
@@ -251,47 +247,58 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 				scores.add(item.getInt("score"));
 			}
 
+			LOG.warning("Begin sort");
 			// Sort the list of scores desc
 			Collections.sort(scores);
 			Collections.reverse(scores);
+			LOG.warning("End sort");
 
 			// Find the JSONObject with this score and get its link
-			for (int i = 0; i < redditSearchResult.length(); i++)
+			for (Iterator<JSONObject> iter = fbFeedItems.iterator(); iter.hasNext();)
 			{
-				JSONObject redditItem = redditSearchResult.getJSONObject(i).getJSONObject("data");
-				if (redditItem.getInt("score") == scores.get(0))
+				JSONObject fbFeedItem = iter.next();
+				for (int i = 0; i < redditSearchResult.length(); i++)
 				{
-					// Find the post in facebok feed array and add it there
-					for (Iterator<JSONObject> iter = fbFeedItems.iterator(); iter.hasNext();)
+					JSONObject redditItem = redditSearchResult.getJSONObject(i).getJSONObject("data");
+					
+					if (redditItem.getInt("score") == scores.get(0) && fbFeedItem.getString("link").contains(redditItem.getString("url")))
 					{
-						JSONObject fbFeedItem = iter.next();
+						LOG.warning("Match! " + redditItem.getString("url"));
+						// We found the match. Comment it to the person's
+						// link post. This needs to be done
+						// asynchronously/ASAP in order to benefit from the
+						// async call of reddit.
 
-						if (fbFeedItem.getString("link").contains(redditItem.getString("url")))
-						{
-							// We found the match. Comment it to the person's
-							// link post. This needs to be done
-							// asynchronously/ASAP in order to benefit from the
-							// async call of reddit.
+						// Get the reddit permalink
+						String redditPermalink = "http://www.reddit.com" + redditItem.getString("permalink");
 
-							// Get the reddit permalink
-							String redditPermalink = "http://www.reddit.com" + redditItem.getString("permalink");
+						// Post it to the user's wall asynchronously
+						String fbComment = action.getComment() + " " + redditPermalink;
 
-							// Post it to the user's wall asynchronously
-							String fbComment = action.getComment() + " " + redditPermalink;
-							fetcher.fetchAsync(Util.AsyncPost(LinkUtils.getPostCommentUrl(settings.getAuthToken(), fbFeedItem.getString("id")),
-									"message", fbComment));
+						// Get a new fetcher reference
+						fetcher = URLFetchServiceFactory.getURLFetchService();
+						LOG.warning("Start fb async call");
+						fetcher.fetchAsync(Util.AsyncPost(LinkUtils.getPostCommentUrl(settings.getAuthToken(), fbFeedItem.getString("id")),
+								"message", fbComment));
+						LOG.warning("Stop fb async call");
 
-							// Store the log in the database asynchronously
-							LogDAO logDao = new LogDAO();
-							UserLog log = new UserLog();
-							log.setFbId(action.getFbId());
-							log.setFbVictimId(fbFeedItem.getJSONObject("from").getString("id"));
-							log.setFbComment(fbComment);
-							log.setFbCommentPermalink("http://facebook.com/" + fbFeedItem.getString("id").split("_")[0] + "/posts/"
-									+ fbFeedItem.getString("id").split("_")[1]);
-							log.setDate(Util.GetDate());
-							logDao.ofy().async().put(log);
-						}
+						// Store the log in the database asynchronously
+						LogDAO logDao = new LogDAO();
+						UserLog log = new UserLog();
+						log.setFbId(action.getFbId());
+						log.setFbVictimId(fbFeedItem.getJSONObject("from").getString("id"));
+						log.setFbComment(fbComment);
+						log.setFbCommentPermalink("http://facebook.com/" + fbFeedItem.getString("id").split("_")[0] + "/posts/"
+								+ fbFeedItem.getString("id").split("_")[1]);
+						log.setDate(Util.GetDate());
+						LOG.warning("Start db async call");
+						logDao.ofy().async().put(log);
+						LOG.warning("Stop db async call");
+
+						// Break out of the loop to prevent double posting.
+						// This happens if the two friends post the same
+						// link.
+						break;
 					}
 				}
 			}

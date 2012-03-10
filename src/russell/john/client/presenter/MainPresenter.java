@@ -72,10 +72,7 @@ public class MainPresenter extends Presenter<MainPresenter.MyView, MainPresenter
 
 				@Override
 				public void onSuccess(FacebookResult result)
-				{
-					// set the side menu since it is a presenter widget
-					// addToSlot(TYPE_SetSideContent, sideMenuPresenter);
-					
+				{					
 					// Fire the event bus, which will force reveal settings presenter
 					FacebookResultReceivedEvent.fire(eventBus, result);				
 				}

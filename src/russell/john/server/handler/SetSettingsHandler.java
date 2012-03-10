@@ -123,23 +123,15 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 	 * Saves the user's settings before begining main troll operation
 	 * 
 	 * @param action
-	 * @throws JSONException
-	 * @throws ParseException
-	 * @throws IOException
-	 * @throws TimeoutException
-	 * @throws ExecutionException
-	 * @throws InterruptedException
-	 * @throws ClientProtocolException
+	 * @throws Exception 
 	 */
-	private void setUserSettingsAndTroll(final SetSettingsAction action) throws JSONException, ParseException, IOException, InterruptedException,
-			ExecutionException, TimeoutException
+	private void setUserSettingsAndTroll(final SetSettingsAction action) throws Exception 
 	{
 		// Save the user to the datastore, and also get the user for authtoken
 		SettingsDAO settingsDao = new SettingsDAO();
 		UserSettings settings = settingsDao.ofy().query(UserSettings.class).filter("fbId", action.getFbId()).get();
 		settings.setComment(action.getComment());
 		settings.setFriends(action.getFriends());
-		settingsDao.put(settings);
 
 		// A collection of all the reddit search URLs. This is needed to do an
 		// async call since the reddit search latency is
@@ -162,7 +154,6 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 				if (Util.GetGMTDateFromUTCString(feedItem.getString("created_time")).after(settings.getLastCheckedDate()))
 				{
 					// Check user specific list
-					LOG.warning("Check user specific list");
 					Boolean userMatch = false;
 					if (settings.getFriends() == null || settings.getFriends().isEmpty())
 						userMatch = true;
@@ -214,13 +205,12 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 			// operations. The maximum is 30, with 5 seconds reserved for
 			// facebook and server overhead.
 			response = future.get(); // We wait now.
-			String result = new String(response.getContent());
 			JSONObject redditObject = new JSONObject(new String(response.getContent()));
 			JSONArray redditSearchResult;
 			if (redditObject.has("error"))
 			{
 				LOG.severe(redditObject.toString());
-				continue;
+				throw new Exception("Reddit error for user: " + settings.getUserId());
 			}
 
 			else

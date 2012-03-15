@@ -45,7 +45,7 @@ public class GetSettingsHandler implements ActionHandler<GetSettingsAction, GetS
 		// Create a new user if one does not exist
 		if (settings == null)
 		{
-			settings = new UserSettings(action.getFbId(), "As seen on Reddit -> ", new Date(0L), new ArrayList<String>(), action.getAuthToken());
+			settings = new UserSettings(action.getFbId(), 50, "As seen on Reddit -> ", new Date(0L), new ArrayList<String>(), action.getAuthToken());
 			dao.put(settings);
 		}
 
@@ -56,7 +56,7 @@ public class GetSettingsHandler implements ActionHandler<GetSettingsAction, GetS
 			dao.put(settings);
 		}
 
-		return new GetSettingsResult(settings.getComment(), settings.getLastCheckedDate(), settings.getFriends());
+		return new GetSettingsResult(settings.getComment(), settings.getRedditThreshold(), settings.getLastCheckedDate(), settings.getFriends());
 	}
 
 	@Override

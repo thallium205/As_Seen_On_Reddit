@@ -16,6 +16,7 @@ public class UserSettings
 	Long userId; // An internal id used by objectify
 	
 	String fbId;
+	Integer redditThreshold;
 	String comment;
 	Date lastCheckedDate;
 	ArrayList<String> friends;
@@ -26,9 +27,10 @@ public class UserSettings
 		// serialization		
 	}
 	
-	public UserSettings(String fbId, String comment, Date lastCheckedDate, ArrayList<String> friends, String authToken)
+	public UserSettings(String fbId, Integer redditThreshold, String comment, Date lastCheckedDate, ArrayList<String> friends, String authToken)
 	{
 		this.fbId = fbId;
+		this.redditThreshold = redditThreshold;
 		this.comment = comment;
 		this.lastCheckedDate = lastCheckedDate;
 		this.friends = friends;
@@ -53,7 +55,17 @@ public class UserSettings
 	public void setFbId(String fbId)
 	{
 		this.fbId = fbId;
-	}	
+	}		
+
+	public Integer getRedditThreshold()
+	{
+		return redditThreshold;
+	}
+
+	public void setRedditThreshold(Integer redditThreshold)
+	{
+		this.redditThreshold = redditThreshold;
+	}
 
 	public String getComment()
 	{

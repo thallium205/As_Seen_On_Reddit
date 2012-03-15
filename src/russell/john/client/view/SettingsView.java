@@ -12,6 +12,7 @@ import russell.john.shared.action.GetSettingsResult;
 
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -31,6 +32,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.IntegerBox;
 
 /**
  * The main page the appliction. Its where they specify their settings and
@@ -50,6 +52,7 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 	@UiField(provided = true)
 	CellTable<FacebookFriendType> cellTable = new CellTable<FacebookFriendType>();
 	@UiField TextArea lblApplyConfirm;
+	@UiField IntegerBox boxRedditThreshold;
 	private final Widget widget;
 
 	ListDataProvider<FacebookFriendType> dataProvider = new ListDataProvider<FacebookFriendType>();
@@ -167,12 +170,22 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 		cellTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
 		cellTable.addColumn(idColumn, "ID");
 		cellTable.addColumn(nameColumn, "Name");
+		
+		// Fix sizes
+		cellTable.setWidth("675px", true);
+		cellTable.setColumnWidth(checkColumn, 10, Unit.PCT);
+		cellTable.setColumnWidth(idColumn, 20, Unit.PCT);
+		cellTable.setColumnWidth(nameColumn, 70, Unit.PCT);	
 
 		// Attach provider
 		dataProvider.addDataDisplay(cellTable);
 		dataList = dataProvider.getList();
 		for (FacebookFriendType friend : result.getFbFriends())
 			dataList.add(friend);
+		
+		// Set row count
+		cellTable.setRowCount(dataList.size());
+		cellTable.setPageSize(20);
 
 		ListHandler<FacebookFriendType> columnSortHandler = new ListHandler<FacebookFriendType>(dataList);
 		columnSortHandler.setComparator(idColumn, new Comparator<FacebookFriendType>()
@@ -226,6 +239,8 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 		// Display the time
 		lblApplyConfirm.setText("Last used: " + result.getLastCheckedDate().toString() + ".  Any posts made by your friends before this date will be skipped to prevent duplicates.");
 		
+		// Display the reddit threshold settings
+		boxRedditThreshold.setValue(result.getRedditThreshold());	
 		
 		// If there are custom victims defined, then we show the table. Else, we
 		// hide the table
@@ -296,5 +311,11 @@ public class SettingsView extends ViewWithUiHandlers<SettingsUiHandlers> impleme
 	{
 		btnApply.setEnabled(true);
 		lblApplyConfirm.setText(text);
+	}
+
+	@Override
+	public Integer getRedditThreshold()
+	{
+		return boxRedditThreshold.getValue();
 	}
 }

@@ -55,7 +55,7 @@ public class MainPresenter extends Presenter<MainPresenter.MyView, MainPresenter
 	{
 		super(eventBus, view, proxy);
 		
-		this.sideMenuPresenter = side;
+		this.sideMenuPresenter = side;	
 		
 		// We need to authenticate with facebook
 		if (Window.Location.getParameter("code") != null)

@@ -6,7 +6,7 @@
 	ui:generateKeys='com.google.gwt.i18n.rebind.keygen.MD5KeyGenerator'
 	ui:generateLocales='default'>
 
-	<g:HTMLPanel width="760px" height="100%">
+	<g:HTMLPanel width="750px" height="100%">
 		<g:DockPanel width="100%" height="100%">
 			<g:Dock direction="WEST">
 				<g:HTMLPanel ui:field="sideContentPanel"/>

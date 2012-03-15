@@ -26,8 +26,11 @@ public class GetSettings
 	String comment;
 	
 	@Out(2)
-	Date lastCheckedDate;
+	Integer redditThreshold;
 	
 	@Out(3)
+	Date lastCheckedDate;
+	
+	@Out(4)
 	ArrayList<String> friends;
 }

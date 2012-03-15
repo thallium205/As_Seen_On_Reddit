@@ -86,8 +86,6 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 			throw new ActionException(e);
 		}
 
-
-		
 	}
 
 	/**
@@ -115,16 +113,16 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 	 * Saves the user's settings before begining main troll operation
 	 * 
 	 * @param action
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	private SetSettingsResult setUserSettingsAndTroll(final SetSettingsAction action) throws Exception 
+	private SetSettingsResult setUserSettingsAndTroll(final SetSettingsAction action) throws Exception
 	{
 		// Get th user's auth token
 		SettingsDAO settingsDao = new SettingsDAO();
 		UserSettings settings = settingsDao.ofy().query(UserSettings.class).filter("fbId", action.getFbId()).get();
 		settings.setComment(action.getComment());
 		settings.setFriends(action.getFriends());
-		
+
 		// The amount of times we posted on someone's wall
 		int match = 0;
 
@@ -136,16 +134,16 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 		// url futures return back
 		ArrayList<JSONObject> fbFeedItems = new ArrayList<JSONObject>();
 
-		// Get the user's feed		
+		// Get the user's feed
 		JSONArray feed = new JSONObject(Util.fetchUrl(LinkUtils.getFeedListUrl(settings.getAuthToken()))).getJSONArray("data");
 		for (int i = 0; i < feed.length(); i++)
 		{
 			JSONObject feedItem = feed.getJSONObject(i);
-			// We are only interested in links			
-			if (feedItem.getString("type").contains("link"))
+			// We are only interested in links
+			if (feedItem.getString("type").contains("link") || feedItem.getString("type").contains("video"))
 			{
 				// Check to make sure the feed item happened after the last time
-				// the user fired the event				
+				// the user fired the event
 				if (Util.GetGMTDateFromUTCString(feedItem.getString("created_time")).after(settings.getLastCheckedDate()))
 				{
 					// Check user specific list
@@ -160,15 +158,22 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 
 					if (userMatch)
 					{
-						// Because reddit's search is horrible, we are going to
-						// do an async pull from their api.						
-						redditUrls.add(LinkUtils.getRedditSearchUrl(feedItem.getString("link")));
+						// Not all type: video have a link
+						if (feedItem.has("link"))
+						{
+							// Because reddit's search is horrible, we are going
+							// to
+							// do an async pull from their api.
+							redditUrls.add(LinkUtils.getRedditSearchUrl(feedItem.getString("link")));
 
-						// We add this feed item to this arraylist so that when
-						// the spawned url futures return, we can find it based
-						// upon the url and post the witty response to the
-						// correct comment						
-						fbFeedItems.add(feedItem);
+							// We add this feed item to this arraylist so that
+							// when
+							// the spawned url futures return, we can find it
+							// based
+							// upon the url and post the witty response to the
+							// correct comment
+							fbFeedItems.add(feedItem);
+						}
 					}
 				}
 			}
@@ -177,17 +182,20 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 		// Process all the collected reddit urls at once. Google will let us do
 		// a max of 10, so if there are more than 10 in this arraylist we will
 		// stop. This is the limitation of the app due to reddit. We will give
-		// reddit 25 seconds to perform all the searches.		
+		// reddit 25 seconds to perform all the searches.
 		URLFetchService fetcher = URLFetchServiceFactory.getURLFetchService();
 		FetchOptions fetchOptions = FetchOptions.Builder.withDeadline(500).followRedirects();
 		ArrayList<Future<HTTPResponse>> asyncRedditResponses = new ArrayList<Future<HTTPResponse>>();
 		for (int i = 0; i < redditUrls.size(); i++)
 		{
-			HTTPRequest request = new HTTPRequest(new URL("http://ineedaride.mobi/reddit.php?redditUrl=" + redditUrls.get(i)), HTTPMethod.GET, fetchOptions);
+			HTTPRequest request = new HTTPRequest(new URL("http://ineedaride.mobi/reddit.php?redditUrl=" + redditUrls.get(i)), HTTPMethod.GET,
+					fetchOptions);
 			asyncRedditResponses.add(fetcher.fetchAsync(request));
+			// Must obey API rules. Otherwise, banhammer.
+			Thread.sleep(1000);
 		}
 
-		// We now wait for all 10 to come (hopefully) pouring in at once		
+		// We now wait for all 10 to come (hopefully) pouring in at once
 		for (Future<HTTPResponse> future : asyncRedditResponses)
 		{
 			HTTPResponse response;
@@ -227,42 +235,48 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 				for (int i = 0; i < redditSearchResult.length(); i++)
 				{
 					JSONObject redditItem = redditSearchResult.getJSONObject(i).getJSONObject("data");
-					
+
 					if (redditItem.getInt("score") == scores.get(0) && fbFeedItem.getString("link").contains(redditItem.getString("url")))
 					{
-						// We found the match. Comment it to the person's
-						// link post. This needs to be done
-						// asynchronously/ASAP in order to benefit from the
-						// async call of reddit.
+						// We only want to consider reddit scores above the user selected value
+						if (redditItem.getInt("score") > action.getRedditThreshold())
+						{
+							// We found the match. Comment it to the person's
+							// link post. This needs to be done
+							// asynchronously/ASAP in order to benefit from the
+							// async call of reddit.
 
-						// Get the reddit permalink
-						String redditPermalink = "http://www.reddit.com" + redditItem.getString("permalink");
+							// Get the reddit permalink
+							String redditPermalink = "http://www.reddit.com" + redditItem.getString("permalink");
 
-						// Post it to the user's wall asynchronously
-						String fbComment = action.getComment() + " " + redditPermalink;
+							// Post it to the user's wall asynchronously
+							String fbComment = action.getComment() + " " + redditPermalink;
 
-						// Get a new fetcher reference					
-						fetcher.fetchAsync(Util.AsyncPost(LinkUtils.getPostCommentUrl(settings.getAuthToken(), fbFeedItem.getString("id")),
-								"message", fbComment));
+							// Get a new fetcher reference
+							fetcher.fetchAsync(Util.AsyncPost(LinkUtils.getPostCommentUrl(settings.getAuthToken(), fbFeedItem.getString("id")),
+									"message", fbComment));
 
-						// Store the log in the database asynchronously
-						LogDAO logDao = new LogDAO();
-						UserLog log = new UserLog();
-						log.setFbId(action.getFbId());
-						log.setFbVictimId(fbFeedItem.getJSONObject("from").getString("id"));
-						log.setFbComment(fbComment);
-						log.setFbCommentPermalink("http://facebook.com/" + fbFeedItem.getString("id").split("_")[0] + "/posts/"
-								+ fbFeedItem.getString("id").split("_")[1]);
-						log.setDate(Util.GetDate());
-						logDao.ofy().async().put(log);
-						
-						//Increment the times we found a positive match.  this is for the user
-						match ++;
+							// Store the log in the database asynchronously
+							LogDAO logDao = new LogDAO();
+							UserLog log = new UserLog();
+							log.setFbId(action.getFbId());
+							log.setFbVictimId(fbFeedItem.getJSONObject("from").getString("id"));
+							log.setFbComment(fbComment);
+							log.setFbCommentPermalink("http://facebook.com/" + fbFeedItem.getString("id").split("_")[0] + "/posts/"
+									+ fbFeedItem.getString("id").split("_")[1]);
+							log.setDate(Util.GetDate());
+							logDao.ofy().async().put(log);
 
-						// Break out of the loop to prevent double posting.
-						// This happens if the two friends post the same
-						// link.
-						break;
+							// Increment the times we found a positive match.
+							// this
+							// is for the user
+							match++;
+
+							// Break out of the loop to prevent double posting.
+							// This happens if the two friends post the same
+							// link.
+							break;
+						}
 					}
 				}
 			}
@@ -271,7 +285,7 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 		// Store the new timestamp from the usersettings in the database
 		settings.setLastCheckedDate(Util.GetDate());
 		settingsDao.put(settings);
-		
+
 		return new SetSettingsResult(redditUrls, match);
 	}
 }

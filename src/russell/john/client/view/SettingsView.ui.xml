@@ -14,6 +14,8 @@
 				<g:TextBox text="As seen on Reddit: " ui:field="boxText"/>
 				<g:Label text="http://reddit.com/some/link/to/post"/>
 			</g:HorizontalPanel>
+			<g:Label text="What is the minimum upvote threshold the application will ignore?"/>
+			<g:IntegerBox ui:field="boxRedditThreshold"/>
 			<g:Label text="Who do you want to include in the search?"/>
 			<g:CheckBox text="Everyone" ui:field="chkEveryone"/>
 			<g:ScrollPanel>

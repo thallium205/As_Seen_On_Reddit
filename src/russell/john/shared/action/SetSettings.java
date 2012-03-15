@@ -22,9 +22,12 @@ public class SetSettings
 	String fbId;
 	
 	@In(2)
-	String comment;
+	Integer redditThreshold;
 	
 	@In(3)
+	String comment;
+	
+	@In(4)
 	ArrayList<String> friends;
 	
 	@Out(1)

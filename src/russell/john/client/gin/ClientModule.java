@@ -13,7 +13,6 @@ import russell.john.client.view.MainView;
 import russell.john.client.view.SideMenuView;
 import russell.john.client.view.SettingsView;
 import russell.john.client.view.LogView;
-// import russell.john.server.servlet.TrollRedditFacebookServlet;
 
 // Binds all the presenters, constants, widgets, servlets, etc.
 public class ClientModule extends AbstractPresenterModule

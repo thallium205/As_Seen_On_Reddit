@@ -8,6 +8,7 @@ import russell.john.shared.action.GetLogResult;
 import russell.john.shared.action.GetLogType;
 
 import com.gwtplatform.mvp.client.ViewImpl;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -130,12 +131,23 @@ public class LogView extends ViewImpl implements LogPresenter.MyView
 			cellTable.addColumn(commentPermalink, "Comment Link");
 			cellTable.addColumn(comment, "Comment Text");
 			cellTable.addColumn(date, "Time");
+			
+			// Fix column sizes for stupid facebook
+			cellTable.setWidth("675px", true);
+			cellTable.setColumnWidth(victimColumn, 10.0, Unit.PCT);
+			cellTable.setColumnWidth(commentPermalink, 40.0, Unit.PCT);
+			cellTable.setColumnWidth(comment, 40.0, Unit.PCT);
+			cellTable.setColumnWidth(date, 10.0, Unit.PCT);
 
 			// Attach provider
 			dataProvider.addDataDisplay(cellTable);
 			dataList = dataProvider.getList();
 			for (GetLogType friend : result.getResults())
 				dataList.add(friend);
+			
+			// Set row count
+			cellTable.setRowCount(dataList.size());
+			cellTable.setPageSize(20);
 
 			ListHandler<GetLogType> columnSortHandler = new ListHandler<GetLogType>(dataList);
 			columnSortHandler.setComparator(victimColumn, new Comparator<GetLogType>()

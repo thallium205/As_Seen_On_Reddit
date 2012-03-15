@@ -48,6 +48,9 @@ public class SettingsPresenter extends Presenter<SettingsPresenter.MyView, Setti
 
 		// The presenter asks the view to get the custom text the user wants.
 		public String getUserText();
+		
+		// Get the reddit threshold
+		public Integer getRedditThreshold();
 
 		// The presenter asks the veiw to get all the selected users to troll.
 		public ArrayList<String> getSelectedUsers();
@@ -123,7 +126,7 @@ public class SettingsPresenter extends Presenter<SettingsPresenter.MyView, Setti
 	public void onBtnApply()
 	{
 		// Sets the settings.
-		dispatcher.execute(new SetSettingsAction(fbResultEvent.getFbResult().getFbId(), getView().getUserText(), getView().getSelectedUsers()), new AsyncCallback<SetSettingsResult>()
+		dispatcher.execute(new SetSettingsAction(fbResultEvent.getFbResult().getFbId(), getView().getRedditThreshold(), getView().getUserText(), getView().getSelectedUsers()), new AsyncCallback<SetSettingsResult>()
 		{
 
 			@Override
@@ -141,7 +144,7 @@ public class SettingsPresenter extends Presenter<SettingsPresenter.MyView, Setti
 				builder.append("Total Link Matches: " + result.getLinksMatched() + "\n");
 				builder.append("Links checked from your feed against Reddit:\n");
 				for (Iterator<String> iter = result.getLinksChecked().iterator(); iter.hasNext();)				
-					builder.append(iter.next() + "\n");						
+					builder.append(iter.next().substring(40) + "\n");						
 				getView().setApplyConfirm(builder.toString());
 
 			}

@@ -7,6 +7,6 @@
 	ui:generateLocales='default' xmlns:p1="urn:import:com.google.gwt.user.cellview.client">
 
 	<g:HTMLPanel>
-		<p1:CellTable ui:field="cellTable"/>
+		<p1:CellTable ui:field="cellTable" width="750" height="100%"/>
 	</g:HTMLPanel>
 </ui:UiBinder>

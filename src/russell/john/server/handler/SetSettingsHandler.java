@@ -121,6 +121,7 @@ public class SetSettingsHandler implements ActionHandler<SetSettingsAction, SetS
 		SettingsDAO settingsDao = new SettingsDAO();
 		UserSettings settings = settingsDao.ofy().query(UserSettings.class).filter("fbId", action.getFbId()).get();
 		settings.setComment(action.getComment());
+		settings.setRedditThreshold(action.getRedditThreshold());
 		settings.setFriends(action.getFriends());
 
 		// The amount of times we posted on someone's wall

@@ -7,8 +7,8 @@ package russell.john.shared.utils;
  */
 public class LinkUtils
 {
-	private static final String SECRET = "3e2aa555609361ef1dd055675fdd69a0"; 
-	private static final String APPLICATION_ID = "307919755941311"; 
+	private static final String SECRET = "XXXXX"; 
+	private static final String APPLICATION_ID = "XXXXX"; 
 
 	private static final String FB_GRAPH_URL = "https://graph.facebook.com/";
 	private static final String FB_OAUTH_URL = FB_GRAPH_URL + "oauth/";
